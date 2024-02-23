@@ -1,0 +1,81 @@
+{
+  "pages": [
+
+    {
+      "path": "pages/master/master",
+      "style": {
+        "navigationStyle": "custom",
+        "mp-weixin": {
+          "backgroundColorTop": "#000000",
+          "backgroundColorBottom": "#000000"
+        }
+      }
+    },
+    {
+      "path": "pages/voice/voice",
+      "style": {
+        "navigationBarTitleText": "voice"
+      }
+    },
+    {
+      "path": "pages/user/view/devInfo",
+      "style": {
+        "navigationBarTitleText": "开发者信息"
+      }
+    },
+    {
+      "path": "pages/user/view/regards",
+      "style": {
+        "navigationBarTitleText": "关于此应用",
+        "backgroundColorTop": "#181818",
+        "backgroundColorBottom": "#181818",
+        "navigationBarBackgroundColor": "#181818",
+        "backgroundColor": "#181818"
+      }
+    },
+    {
+      "path": "pages/user/view/myConfig",
+      "style": {
+        "navigationBarTitleText": "管理配置",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/user/view/changeModel",
+      "style": {
+        "navigationBarTitleText": "选择模型",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/auth/wechatLogin",
+      "style": {
+        "navigationBarTitleText": "",
+        "enablePullDownRefresh": true,
+        "mp-weixin": {
+          "backgroundColorTop": "#000000",
+          "backgroundColorBottom": "#000000"
+        }
+      }
+    },
+    {
+      "path": "pages/user/user",
+      "style": {
+        "navigationBarTitleText": ""
+      }
+    },
+    {
+      "path": "pages/auth/scanQRCodeToLogIn",
+      "style": {
+        "navigationBarTitleText": ""
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "TYPE STAR",
+    "navigationBarBackgroundColor": "#000000",
+    "backgroundColor": "#000000"
+  },
+  "uniIdRouter": {}
+}

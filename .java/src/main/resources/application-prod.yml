@@ -1,0 +1,53 @@
+spring:
+  data:
+    redis:
+      database: 0
+      host: 127.0.0.1
+      port: 6379
+      password: ''
+  datasource:
+    username: root
+    password: 123
+    url: jdbc:mysql://127.0.0.1:3306/ts_stars?useUnicode=true&serverTimezone=Asia/Shanghai&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&autoReconnect=true&allowMultiQueries=true&useSSL=true
+
+
+# 阿里OSS配置------------------------------+
+ali-oss:
+  endpoint: 'oss-cn-shanghai.aliyuncs.com'
+  access-key: '阿里OSS access-key'
+  secret-key: '阿里OSS secret-key'
+  bucket-name: 'sea-time'
+  domain: '图片服务器域名'
+
+we-chat:
+  host: https://api.weixin.qq.com
+  app-id: '微信小程序APPID'
+  secret-key: '微信小程序密钥'
+
+chat-gpt:
+  model-list:
+    - model: gpt-3.5-turbo-1106
+      name: gpt-3.5-turbo-1106
+    - model: gpt-3.5-turbo-0613
+      name: gpt-3.5-turbo-0613
+    - model: gpt-3.5-turbo-0125
+      name: gpt-3.5-turbo-0125
+    - model: gpt-3.5-turbo
+      name: gpt-3.5-turbo
+    - model: gpt-4-0613
+      name: gpt-4-0613
+    - model: gpt-4-1106-preview
+      name: gpt-4-1106-preview
+    - model: gpt-4-0125-preview
+      name: gpt-4-0125-preview
+    - model: gpt-4-turbo-preview
+      name: gpt-4-turbo-preview
+    - model: gpt-4
+      name: gpt-4
+
+# SSL证书
+#server:
+#  ssl:
+#    key-store: classpath:anchwngb.cn.pfx
+#    key-store-password: 证书密码
+#    key-store-type: PKCS12

@@ -1,0 +1,69 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "GENERATE_IMAGE",
+      "description": "根据提示词生成图像（由 OPENAI DALL-E3 模型生成），该 API 返回生成的图像和图像介绍(注意介绍可能为英文 需要翻译为中文,图像也要提供给用户)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "绘画提示，例如一只小狗，一位亚洲美女"
+          }
+        },
+        "required": [
+          "prompt"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PARSE_FILE",
+      "description": "根据用户传入的文件URL(仅支持PDF,EXCEL,DOCX)获取文件内容",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "文件网络地址,例如https://sea-time.oss-accelerate.aliyuncs.com/TEMP/数据.xlsx"
+          },
+          "type": {
+            "type": "string",
+            "description": "文件类型,例如PDF或XLSX或DOCX"
+          }
+        },
+        "required": [
+          "url",
+          "type"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "RECOGNITION",
+      "description": "接收图像并回答有关图像的问题(gpt-4-vision-preview)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "图片网络地址,例如https://sea-time.oss-accelerate.aliyuncs.com/TEMP/XXX.jpg"
+          },
+          "text": {
+            "type": "string",
+            "description": "用户问题"
+          }
+        },
+        "required": [
+          "url",
+          "text"
+        ]
+      }
+    }
+  }
+]
