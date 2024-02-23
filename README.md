@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 
-### 功能介绍(建议自行体验,以下介绍部分,此项目建议搭配OneApi使用) (项目演示请滑动至最下方)
+### 功能介绍(建议自行体验,以下介绍部分,此项目建议搭配OneApi使用,请务必读完此文档) (项目演示请滑动至最下方)
 `自定义GPT模型对话`  `聊天识图` `聊天生图` `语音对话` `文件识别(注意 如果是office 仅支持2007年后的格式 如 docx xlsx ,懒得兼容旧格式)`
 ### 项目架构
 
