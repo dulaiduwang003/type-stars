@@ -54,10 +54,10 @@ public class DallDrawingPlugIn {
      * @param dto the prompt
      * @return the string
      */
-    public JSONObject GENERATE_IMAGE(final String dto) {
+    public JSONObject GENERATE_IMAGE(final String dto, String proxyAddress, String authToken) {
         final String block = WebClient.builder()
-                .baseUrl("https://www.lxlchat.top/v1/images/generations")
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer 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")
+                .baseUrl(proxyAddress + "/images/generations")
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + authToken)
                 .codecs(item -> item.defaultCodecs().maxInMemorySize(20 * 1024 * 1024))
                 .build()
                 .post()

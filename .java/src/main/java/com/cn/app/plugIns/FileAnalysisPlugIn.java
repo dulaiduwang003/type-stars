@@ -67,6 +67,8 @@ public class FileAnalysisPlugIn {
                 vo.setResult(readXlsx(inputStream));
             } else if (attribute.getType().equals(FileTypeEnum.DOCX.getDec())) {
                 vo.setResult(readDocx(inputStream));
+            } else {
+                throw new RuntimeException("不支持该类型文件");
             }
         } catch (Exception e) {
             return (JSONObject) JSONObject.toJSON(vo.setResult(e.getMessage()));

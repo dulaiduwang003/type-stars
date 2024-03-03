@@ -4,12 +4,13 @@ import mpHtml from '@/components/mp-html/components/mp-html/mp-html'
 import InputComponent from "@/components/inputComponent.vue";
 import {onLoad} from '@dcloudio/uni-app'
 
-import {getCurrentInstance, reactive, ref} from 'vue'
-import AiLoadingComponent from "@/components/AiLoadingComponent.vue";
+import {defineExpose, getCurrentInstance, reactive, ref} from 'vue'
+import AiLoadingComponent from "@/components/aiLoadingComponent.vue";
 import env from "@/env";
 import {getTokenValue, removeTokenValue} from "@/store/token";
-import FilePreviewComponent from "@/components/FilePreviewComponent.vue";
+import FilePreviewComponent from "@/components/filePreviewComponent.vue";
 import UploadChooseComponent from "@/components/uploadChooseComponent.vue";
+import {getChatTopic, setChatTopic} from "@/store/chatTopic";
 
 
 const instance = getCurrentInstance();
@@ -153,16 +154,25 @@ const previewFileOrImage = (src) => {
 
 const socketClose = (index) => {
   let interval = setInterval(() => {
+    let isError = false
     if (messageQueue.length === 0) {
       const answer = messageList.value[index].answer;
       if (!answer) {
         messageList.value.splice(index, 1)
+        isError = true
       } else if (answer === "é") {
         messageList.value[index].isError = true
         messageList.value[index].answer = "当前会话出现了点问题,请稍后重试"
       }
+      const chatTopic = getChatTopic();
+
+      if (!chatTopic.array[chatTopic.index].title && !isError) {
+        chatTopic.array[chatTopic.index].title = messageList.value[index].issue.substring(0, 20)
+      }
+      chatTopic.array[chatTopic.index].content = messageList.value
       inputRef.value.clear()
       isLoading.value = false
+      setChatTopic(chatTopic)
       clearInterval(interval)
     }
   }, 50);
@@ -255,9 +265,9 @@ const scrollToBottom = () => {
 }
 
 const showUpload = () => {
-  if (getTokenValue()){
+  if (getTokenValue()) {
     uploadRef.value.open()
-  }else {
+  } else {
     uni.navigateTo({
       url: '/pages/auth/wechatLogin',
       animationType: 'pop-in',
@@ -320,11 +330,19 @@ const upload = (path, name, size) => {
   });
 }
 
+const html = (data) => {
+  messageList.value = data
+}
+
 onLoad(() => {
   setTimeout(() => {
     scrollTop.value = 99999
   }, 800)
 })
+
+defineExpose(
+    {html}
+)
 
 </script>
 

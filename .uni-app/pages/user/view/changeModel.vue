@@ -72,10 +72,7 @@ const getModelList = async () => {
           APPLIED
         </view>
       </view>
-      <view class="text-ellipsis">
-        text generation models such as 4 and 3.5, have been trained to understand both natural and formal languages.
-        Models like 4 allow text output in response to its input
-      </view>
+
     </view>
   </view>
 </template>

@@ -22,17 +22,17 @@ public class GptPlugInsExecuteCommon {
 
     private final PictureRecognitionPlugIn pictureRecognitionPlugIn;
 
-    public JSONObject invoke(final String name, String dto) {
+    public JSONObject invoke(final String name, String dto, String proxyAddress, String authToken) {
 
         switch (name) {
             case "GENERATE_IMAGE" -> {
-                return dallDrawingPlugIn.GENERATE_IMAGE(dto);
+                return dallDrawingPlugIn.GENERATE_IMAGE(dto, proxyAddress, authToken);
             }
             case "PARSE_FILE" -> {
                 return analysisPlugIn.PARSE_FILE(dto);
             }
             case "RECOGNITION" -> {
-                return pictureRecognitionPlugIn.RECOGNITION(dto);
+                return pictureRecognitionPlugIn.RECOGNITION(dto, proxyAddress, authToken);
             }
             default -> throw new RuntimeException("no executable methods found");
         }

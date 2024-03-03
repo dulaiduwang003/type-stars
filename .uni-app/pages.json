@@ -12,6 +12,16 @@
       }
     },
     {
+      "path": "pages/master/view/chatTopicView",
+      "style": {
+        "navigationBarTitleText": "历史会话",
+        "mp-weixin": {
+          "backgroundColorTop": "#000000",
+          "backgroundColorBottom": "#000000"
+        }
+      }
+    },
+    {
       "path": "pages/voice/voice",
       "style": {
         "navigationBarTitleText": "voice"

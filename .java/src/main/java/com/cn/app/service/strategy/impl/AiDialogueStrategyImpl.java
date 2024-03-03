@@ -71,9 +71,11 @@ public class AiDialogueStrategyImpl implements AIInteractionModeStrategy {
 
             openAISendRequest(map, dto.getToken(), dto.getUrl())
                     .doFinally(signal -> {
+
                         if (pluginUsed[0] && initialStructureHolder[0] != null && !argumentsBuilder.isEmpty()) {
                             String completeArguments = argumentsBuilder.toString();
                             JSONObject argumentsJson = parseObject(completeArguments);
+                            System.out.println(argumentsJson);
                             JSONArray toolCalls = initialStructureHolder[0].getJSONArray("tool_calls");
                             if (toolCalls != null && !toolCalls.isEmpty()) {
                                 JSONObject toolCall = toolCalls.getJSONObject(0);
@@ -87,9 +89,9 @@ public class AiDialogueStrategyImpl implements AIInteractionModeStrategy {
                                     messages.add(initialStructureHolder[0]);
                                     if (functionName != null) {
                                         Thread.ofVirtual().start(() -> {
-                                            final JSONObject invoke = gptPlugInsExecuteCommon.invoke(functionName, arguments);
+                                            final JSONObject invoke = gptPlugInsExecuteCommon.invoke(functionName, arguments, dto.getUrl(), dto.getToken());
                                             //build request body
-                                            messages.add(JSON.parseObject(JSON.toJSONString(new ToolsMessages()
+                                            messages.add(parseObject(JSON.toJSONString(new ToolsMessages()
                                                     .setContent(invoke.toString())
                                                     .setTool_call_id(id)
                                                     .setName(functionName))));

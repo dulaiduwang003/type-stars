@@ -68,7 +68,7 @@ public class PictureRecognitionPlugIn {
      * @param dto the prompt
      * @return the string
      */
-    public JSONObject RECOGNITION(final String dto) {
+    public JSONObject RECOGNITION(final String dto, final String proxyAddress, final String authToken) {
         final Vo vo = new Vo();
         try {
             final Attribute attribute = parseObject(dto, Attribute.class);
@@ -76,8 +76,8 @@ public class PictureRecognitionPlugIn {
             final PictureRecognition body = new PictureRecognition()
                     .setMessages(List.of(new Message().setContent(messages)));
             final String block = WebClient.builder()
-                    .baseUrl("https://www.lxlchat.top/v1/chat/completions")
-                    .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer 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")
+                    .baseUrl(proxyAddress + "/chat/completions")
+                    .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + authToken)
                     .codecs(item -> item.defaultCodecs().maxInMemorySize(20 * 1024 * 1024))
                     .build()
                     .post()
@@ -89,7 +89,7 @@ public class PictureRecognitionPlugIn {
             final JSONArray choices = jsonObject.getJSONArray("choices");
             final JSONObject message = choices.getJSONObject(0).getJSONObject("message");
             return (JSONObject) JSONObject.toJSON(vo.setResult(message.getString("content")));
-        }catch (Exception e){
+        } catch (Exception e) {
             return (JSONObject) JSONObject.toJSON(vo.setResult(e.getMessage()));
         }
     }

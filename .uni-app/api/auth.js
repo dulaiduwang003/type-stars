@@ -7,3 +7,10 @@ export function wechatLogin(data) {
         data
     })
 }
+
+export function reqLogout() {
+    return request({
+        url: '/auth/logout',
+        method: 'POST'
+    })
+}

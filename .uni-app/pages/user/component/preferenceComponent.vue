@@ -2,6 +2,8 @@
 import {ref} from 'vue'
 import {onLoad} from '@dcloudio/uni-app'
 import store from "@/store";
+import {removeTokenValue} from "@/store/token";
+import {reqLogout} from "@/api/auth";
 
 const isPlugIns = ref(false)
 
@@ -11,11 +13,28 @@ const toRouterPage = (url) => {
   )
 }
 
-const onChange = (e)=>{
+const onChange = (e) => {
   const userSetting = store.getters.userSetting;
   isPlugIns.value = e.detail.value
   userSetting.isPlugIns = isPlugIns.value
-  store.commit("setUserSetting",userSetting);
+  store.commit("setUserSetting", userSetting);
+}
+
+const logout = async () => {
+  try {
+    uni.showLoading({
+      title: "正在退出ing",
+    });
+    await reqLogout();
+    removeTokenValue()
+    uni.hideLoading()
+    uni.reLaunch({
+      url: '/pages/master/master'
+    })
+  } catch (e) {
+
+    uni.showToast({icon: 'none', duration: 3000, title: e.msg});
+  }
 }
 
 onLoad(() => {
@@ -36,7 +55,7 @@ onLoad(() => {
     <view class="card">
       <view class="operation">
         <span class="prompt">Use plug ins & all</span>
-        <switch :checked="isPlugIns" color="#FFCC33" style="transform:scale(0.7)" @change="onChange" />
+        <switch :checked="isPlugIns" color="#FFCC33" style="transform:scale(0.7)" @change="onChange"/>
       </view>
       <p class="introduce">
         Using all the plugins included in this application may slow down response speed in some cases. Turning this
@@ -92,7 +111,7 @@ onLoad(() => {
       </button>
     </view>
 
-    <view class="logout">
+    <view class="logout" @click="logout">
       <view>
         退出登录
       </view>

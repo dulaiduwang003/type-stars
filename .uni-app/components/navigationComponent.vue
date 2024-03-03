@@ -42,6 +42,8 @@ const toUserInfoPage = () => {
 }
 
 
+
+
 onLoad(() => {
   //获取小程序胶囊的高度
   let {
@@ -56,21 +58,20 @@ onLoad(() => {
 
 <template>
   <view class="container" :style="{'padding-top':navBarHeight +'px'}">
-    <view class="setting" @click="toUserInfoPage">
+    <view class="setting" @click="toUserInfoPage" >
       <image src="/static/icon/setting.svg"/>
     </view>
 
-    <view class="text">
-      <view>
-        <!--      标题名称-->
-        <span>TypeStar</span>
-        <!--      版本号-->
-        <span class="version-below"> 0.01</span>
-      </view>
-      <view class="tips-below">
-        welcome to try TypeStar
-      </view>
-    </view>
+<!--    <view class="text">-->
+<!--      <view>-->
+<!--        &lt;!&ndash;      标题名称&ndash;&gt;-->
+<!--        <span>TypeStar</span>-->
+
+<!--      </view>-->
+<!--      <view class="tips-below">-->
+<!--        welcome to try TypeStar-->
+<!--      </view>-->
+<!--    </view>-->
     <!--    占位-->
     <view class="occupancy">
       <view/>

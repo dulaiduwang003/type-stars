@@ -73,7 +73,7 @@ defineExpose(
           auto-height="true"
           maxlength="-1"
           :disabled="props.isLoading"
-          :placeholder="props.isLoading?'Thinking about it please wait a moment...':'Is there anything I can help with'"
+          :placeholder="props.isLoading?'请稍等片刻...':''"
           placeholder-class="placeholder-class"/>
       <view class="btn-send" v-if="!props.isLoading" @click="send">
         <image src="/static/icon/send.svg"/>
@@ -167,7 +167,7 @@ defineExpose(
 
 .textarea {
 
-  border: 2rpx solid #4c4c4c;
+  border: 4rpx solid #4c4c4c;
   padding: 3rpx 10rpx;
   border-radius: 38rpx;
   width: 490rpx;

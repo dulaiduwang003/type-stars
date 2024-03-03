@@ -59,11 +59,12 @@ import audio from './audio/index.js'
 import emoji from './emoji/index.js'
 import highlight from './highlight/index.js'
 import latex from './latex/index.js'
+import search from './search/index.js'
 import style from './style/index.js'
 import imgCache from './img-cache/index.js'
 import card from './card/index.js'
 import editable from './editable/index.js'
-const plugins=[markdown,audio,emoji,highlight,latex,style,imgCache,card,editable,]
+const plugins=[markdown,audio,emoji,highlight,latex,search,style,imgCache,card,editable,]
 // #ifdef APP-PLUS-NVUE
 const dom = weex.requireModule('dom')
 // #endif
