@@ -8,7 +8,6 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.poi.EmptyFileException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -27,6 +26,7 @@ import java.net.URL;
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("all")
 public class FileAnalysisPlugIn {
 
     @Data
@@ -53,33 +53,38 @@ public class FileAnalysisPlugIn {
      * @param dto the dto
      * @return the json object
      */
-    @SuppressWarnings("all")
     public JSONObject PARSE_FILE(final String dto) {
 
         final Vo vo = new Vo();
         final Attribute attribute = JSONObject.parseObject(dto, Attribute.class);
-
+        final String type = attribute.getType().toUpperCase();
         try {
             InputStream inputStream = new URL(attribute.getUrl()).openStream();
-            if (attribute.getType().equals(FileTypeEnum.PDF.getDec())) {
+            if (type.equals(FileTypeEnum.PDF.getDec())) {
                 vo.setResult(readPdf(inputStream));
-            } else if (attribute.getType().equals(FileTypeEnum.XLSX.getDec())) {
+            } else if (type.equals(FileTypeEnum.XLSX.getDec())) {
                 vo.setResult(readXlsx(inputStream));
-            } else if (attribute.getType().equals(FileTypeEnum.DOCX.getDec())) {
+            } else if (type.equals(FileTypeEnum.DOCX.getDec())) {
                 vo.setResult(readDocx(inputStream));
-            } else {
-                throw new RuntimeException("不支持该类型文件");
+            }
+
+            final String result = vo.getResult().trim();
+            if (result.length() > 500) {
+                vo.setResult(result.substring(0, 600));
             }
         } catch (Exception e) {
-            return (JSONObject) JSONObject.toJSON(vo.setResult(e.getMessage()));
+
+            vo.setResult("THE DOWNLOAD LINK PROVIDED IS INVALID");
         }
+
         return (JSONObject) JSONObject.toJSON(vo);
     }
 
     private String readDocx(InputStream inputStream) {
-        // 读取Docx文件内容
-        XWPFDocument document = null;
         try {
+            // 读取Docx文件内容
+            XWPFDocument document = null;
+
             document = new XWPFDocument(inputStream);
             StringBuilder content = new StringBuilder();
             for (XWPFParagraph paragraph : document.getParagraphs()) {
@@ -87,48 +92,50 @@ public class FileAnalysisPlugIn {
             }
             document.close();
             return content.toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (EmptyFileException e) {
-            return "";
+        } catch (Exception e) {
+            return "THE DOCX IS NOT RECOGNIZED";
         }
     }
 
     private String readPdf(InputStream inputStream) {
-        PDDocument document;
         try {
+            PDDocument document;
             document = PDDocument.load(inputStream);
 
             PDFTextStripper pdfStripper = new PDFTextStripper();
             String text = pdfStripper.getText(document);
+
             document.close();
             return text;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (EmptyFileException e) {
-            return "";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "THE PDF IS NOT RECOGNIZED";
         }
     }
 
     private String readXlsx(InputStream inputStream) {
-        StringBuilder str = new StringBuilder();
-        Workbook workbook = null;
         try {
-            workbook = new XSSFWorkbook(inputStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Sheet sheet = workbook.getSheetAt(0);
-        for (Row currentRow : sheet) {
-            for (Cell currentCell : currentRow) {
-                if (currentCell.getCellType() == CellType.STRING) {
-                    str.append(currentCell.getStringCellValue()).append("\t");
-                } else if (currentCell.getCellType() == CellType.NUMERIC) {
-                    str.append(currentCell.getNumericCellValue()).append("\t");
-                }
+            StringBuilder str = new StringBuilder();
+            Workbook workbook = null;
+            try {
+                workbook = new XSSFWorkbook(inputStream);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            str.append("\n");
+            Sheet sheet = workbook.getSheetAt(0);
+            for (Row currentRow : sheet) {
+                for (Cell currentCell : currentRow) {
+                    if (currentCell.getCellType() == CellType.STRING) {
+                        str.append(currentCell.getStringCellValue()).append("\t");
+                    } else if (currentCell.getCellType() == CellType.NUMERIC) {
+                        str.append(currentCell.getNumericCellValue()).append("\t");
+                    }
+                }
+                str.append("\n");
+            }
+            return str.toString().trim();
+        } catch (Exception e) {
+            return "THE XLSX IS NOT RECOGNIZED";
         }
-        return str.toString().trim();
     }
 }

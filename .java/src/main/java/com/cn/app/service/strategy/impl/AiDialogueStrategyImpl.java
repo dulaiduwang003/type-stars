@@ -18,10 +18,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.IntStream;
 
 import static com.alibaba.fastjson.JSON.parseArray;
 import static com.alibaba.fastjson.JSON.parseObject;
@@ -65,47 +63,58 @@ public class AiDialogueStrategyImpl implements AIInteractionModeStrategy {
             map.put("tools", GptPlugInsCommon.PLUG_INS_REQUEST_FUNCTION);
             map.put("tool_choice", "auto");
             final StringBuilder argumentsBuilder = new StringBuilder();
-            final JSONObject[] initialStructureHolder = new JSONObject[1];
-            final boolean[] structureCaptured = new boolean[1];
+            final List<JSONObject>[] initialStructureHolder = new ArrayList[1];
             final boolean[] pluginUsed = new boolean[1];
+            final List<JSONObject>[] initialStructureArguments = new ArrayList[1];
 
             openAISendRequest(map, dto.getToken(), dto.getUrl())
                     .doFinally(signal -> {
 
-                        if (pluginUsed[0] && initialStructureHolder[0] != null && !argumentsBuilder.isEmpty()) {
-                            String completeArguments = argumentsBuilder.toString();
-                            JSONObject argumentsJson = parseObject(completeArguments);
-                            System.out.println(argumentsJson);
-                            JSONArray toolCalls = initialStructureHolder[0].getJSONArray("tool_calls");
-                            if (toolCalls != null && !toolCalls.isEmpty()) {
-                                JSONObject toolCall = toolCalls.getJSONObject(0);
-                                JSONObject function = toolCall.getJSONObject("function");
-                                if (function != null) {
-                                    // reinsert the full arguments
-                                    function.put("arguments", JSON.toJSONString(argumentsJson));
-                                    String functionName = function.getString("name");
-                                    String id = toolCall.getString("id");
-                                    String arguments = function.getString("arguments");
-                                    messages.add(initialStructureHolder[0]);
-                                    if (functionName != null) {
-                                        Thread.ofVirtual().start(() -> {
-                                            final JSONObject invoke = gptPlugInsExecuteCommon.invoke(functionName, arguments, dto.getUrl(), dto.getToken());
-                                            //build request body
-                                            messages.add(parseObject(JSON.toJSONString(new ToolsMessages()
-                                                    .setContent(invoke.toString())
-                                                    .setTool_call_id(id)
-                                                    .setName(functionName))));
 
-                                            map.put("messages", messages);
-                                            openAISendRequest(map, dto.getToken(), dto.getUrl())
-                                                    .doFinally((f) -> sink.complete())
-                                                    .subscribe(data -> {
-                                                        sink.next(analysis(data));
-                                                    });
-                                        });
-                                    }
-                                }
-                            }
+                        if (pluginUsed[0] && initialStructureHolder[0] != null) {
+                            //获取方法参数
+                            final List<JSONObject> argumentList = initialStructureArguments[0];
+                            //获取方法名
+                            final List<JSONObject> holderList = initialStructureHolder[0];
+                            final List<Task> taskList = new LinkedList<>();
+                            JSONObject tool_function = new JSONObject();
+                            JSONArray tools = new JSONArray();
+                            tool_function.put("role", "assistant");
+
+                            IntStream.range(0, holderList.size())
+                                    .forEach(index -> {
+
+                                        JSONObject function = holderList.get(index).getJSONObject("function");
+                                        if (function != null) {
+                                            // reinsert the full arguments
+                                            function.put("arguments", JSON.toJSONString(argumentList.get(index)));
+                                            String functionName = function.getString("name");
+                                            String id = holderList.get(index).getString("id");
+                                            String arguments = function.getString("arguments");
+                                            tools.add(holderList.get(index));
+                                            taskList.add(new Task()
+                                                    .setFunctionName(functionName)
+                                                    .setArguments(arguments)
+                                                    .setToolCallId(id)
+                                            );
+                                        }
+                                    });
+                            tool_function.put("tool_calls", tools);
+                            messages.add(tool_function);
+                            taskList.parallelStream().forEach(t -> {
+                                final JSONObject invoke = gptPlugInsExecuteCommon.invoke(t.getFunctionName(), t.getArguments(), dto.getUrl(), dto.getToken());
+                                //build request body
+                                messages.add(parseObject(JSON.toJSONString(new ToolsMessages()
+                                        .setContent(invoke.toString())
+                                        .setTool_call_id(t.getToolCallId())
+                                        .setName(t.getFunctionName()))));
+                                map.put("messages", messages);
+                            });
+                            openAISendRequest(map, dto.getToken(), dto.getUrl())
+                                    .doFinally((f) -> sink.complete())
+                                    .subscribe(data -> {
+                                        sink.next(analysis(data));
+                                    });
 
                         } else {
                             sink.complete();
@@ -113,6 +122,7 @@ public class AiDialogueStrategyImpl implements AIInteractionModeStrategy {
 
                     })
                     .subscribe(data -> {
+
                         if (JSON.isValidObject(data)) {
                             JSONObject jsonObject = JSONObject.parseObject(data);
                             JSONArray choices = jsonObject.getJSONArray("choices");
@@ -120,10 +130,18 @@ public class AiDialogueStrategyImpl implements AIInteractionModeStrategy {
                                 final JSONObject dataSet = choices.getJSONObject(0);
                                 if (dataSet.containsKey("delta")) {
                                     final JSONObject delta = dataSet.getJSONObject("delta");
-                                    if (!structureCaptured[0]) {
-                                        // The initial structure is saved, but excluded arguments
-                                        initialStructureHolder[0] = delta;
-                                        structureCaptured[0] = true;
+                                    JSONArray t = delta.getJSONArray("tool_calls");
+                                    if (t != null) {
+                                        final JSONObject p = t.getJSONObject(0);
+                                        if (p.containsKey("type")) {
+                                            if (initialStructureHolder[0] == null) {
+                                                initialStructureHolder[0] = new ArrayList<>();
+                                                initialStructureHolder[0].add(p);
+                                            } else {
+                                                initialStructureHolder[0].add(p);
+                                            }
+
+                                        }
                                     }
                                     if (delta.containsKey("tool_calls")) {
                                         pluginUsed[0] = true; // the tag detects the use of the plugin
@@ -134,20 +152,45 @@ public class AiDialogueStrategyImpl implements AIInteractionModeStrategy {
                                             if (function != null && function.containsKey("arguments")) {
                                                 String arguments = function.getString("arguments");
                                                 argumentsBuilder.append(arguments);
+
                                             }
                                         }
+                                        final String string = argumentsBuilder.toString();
+                                        try {
+                                            if (JSON.isValidObject(string)) {
+                                                if (initialStructureArguments[0] == null) {
+                                                    initialStructureArguments[0] = new ArrayList<>();
+                                                    initialStructureArguments[0].add(JSONObject.parseObject(argumentsBuilder.toString()));
+                                                    argumentsBuilder.setLength(0);
+                                                } else {
+                                                    initialStructureArguments[0].add(JSONObject.parseObject(argumentsBuilder.toString()));
+                                                }
+                                            }
+                                        } catch (Exception e) {
+
+                                        }
+
                                     } else {
+
                                         if (!pluginUsed[0]) {
                                             // process and return data directly
-                                            if (delta.containsKey("content")) {
-                                                sink.next(delta.getString("content"));
+                                            try {
+                                                if (delta != null && delta.containsKey("content")) {
+                                                    sink.next(delta.getString("content"));
+                                                }
+                                            } catch (Exception ex) {
+
                                             }
                                         }
+
                                     }
                                 }
                             }
                         }
-                    }, Throwable::printStackTrace);
+                    }, throwable -> {
+                        final String message = throwable.getMessage();
+                        sink.next("服务貌似出现了一点问题,请稍后再试 错误原因: \n ```json \n" + message + " \n ```");
+                    });
         });
     }
 
@@ -165,8 +208,8 @@ public class AiDialogueStrategyImpl implements AIInteractionModeStrategy {
                         .flatMap(errorBody -> {
                             final String errorCode = parseObject(errorBody).getString("error");
                             final JSONObject jsonObject = parseObject(errorCode);
-                            System.out.println(jsonObject);
-                            return Mono.error(new RuntimeException());
+
+                            return Mono.error(new RuntimeException(jsonObject.toJSONString()));
                         })))
                 .bodyToFlux(String.class);
     }
@@ -188,6 +231,18 @@ public class AiDialogueStrategyImpl implements AIInteractionModeStrategy {
             }
         }
         return "";
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class Task {
+
+        private String functionName;
+
+        private String arguments;
+
+        private String toolCallId;
+
     }
 
     @Data

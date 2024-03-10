@@ -27,16 +27,6 @@ we-chat:
 chat-gpt:
   model-list:
     - model: gpt-3.5-turbo-1106
-      name: ts-3.5-turbo-1106
-    - model: gpt-3.5-turbo
-      name: ts-3.5-turbo
-    - model: gpt-4-0613
-      name: ts-4-0613
+      name: gpt-3.5-turbo-1106
     - model: gpt-4-1106-preview
-      name: ts-4-1106-preview
-    - model: gpt-4-0125-preview
-      name: ts-4-0125-preview
-    - model: gpt-4-turbo-preview
-      name: ts-4-turbo-preview
-    - model: gpt-4
-      name: ts-4
+      name: gpt-4-1106-preview

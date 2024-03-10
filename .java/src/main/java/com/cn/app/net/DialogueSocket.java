@@ -1,5 +1,6 @@
 package com.cn.app.net;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cn.app.constant.ChatStatusConstant;
 import com.cn.app.dto.AiRequestDto;
@@ -38,7 +39,20 @@ public class DialogueSocket {
             session.setMaxBinaryMessageBufferSize(maxSize);
             session.setMaxTextMessageBufferSize(maxSize);
         }
-        this.session = session;
+        try {
+            assert session.getId() != null;
+            this.session = session;
+            //校验用户
+            final Object id = StpUtil.getLoginIdByToken(token);
+            if (id == null) {
+                throw new SocketColoseException("无法获取用户信息以建立连接数据,已拒绝连接");
+            }
+
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            handleWebSocketCompletion();
+            return;
+        }
         if (factory == null) {
             factory = (AIInteractionModeStrategyFactory) SpringContextUtil.getBean("AIInteractionModeStrategyFactory");
         }
